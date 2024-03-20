@@ -1,0 +1,25 @@
+{
+  "monitors": [
+    {
+      "name": "Custom Monitor - 1",
+      "result": {
+        "value": 81,
+        "processed_at": 1710959083
+      }
+    },
+    {
+      "name": "Local Monitor - 1",
+      "result": {
+        "value": 13,
+        "processed_at": 1710959083
+      }
+    },
+    {
+      "name": "Local Monitor - 2",
+      "result": {
+        "value": 60,
+        "processed_at": 1710959083
+      }
+    }
+  ]
+}
