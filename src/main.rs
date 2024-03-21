@@ -9,8 +9,13 @@ use std::time::Duration;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct Monitor {
+    monitor_id: Option<u64>,
     name: String,
+    #[serde(rename = "type")]
+    mytype: Option<String>,
+    script: Option<String>,
     result: Option<result_for_output>,
+    code: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -42,7 +47,7 @@ fn update_monitors(monitor_for_update: &mut Monitors) {
 fn store_monitors(monitor_for_update: &Monitors) -> Result<(), IOError> {
     let now = SystemTime::now();
     let current_time = now.duration_since(UNIX_EPOCH).expect("Failed to obtain current time").as_secs();
-    let filename = format!("D:/MEDIUSWARE/PROJECT/assesment/process_monitor/assets/{}_monitors.json", current_time);
+    let filename = format!("D:/jilan/assesment/Assesment_MW/assets/{}_monitors.json", current_time);
     let json_output = serde_json::to_string_pretty(monitor_for_update)?;
     let mut file = File::create(filename)?;
     file.write_all(json_output.as_bytes())?;
@@ -91,7 +96,7 @@ fn main() -> Result<(), IOError> {
         value: 0,
         processed_at: 0,
     };
-    let mut file = File::create("D:/MEDIUSWARE/PROJECT/assesment/process_monitor/assets/output.json").expect("Soory , Failed to create file");
+    let mut file = File::create("D:/jilan/assesment/Assesment_MW/assets/output.json").expect("Sorry , Failed to create file");
     let mut vector: Vec<serde_json::Value> = Vec::new();
 
     for m in &mut monitor_for_update.monitors {
