@@ -29,10 +29,10 @@ struct result_for_output {
     processed_at: u64,
 }
 
-fn update_monitors(monitor_for_update: &mut Monitors) {
+fn update_monitors(input_path: &str, monitor_for_update: &mut Monitors) -> Result<(), std::io::Error> {
     let mut rng = thread_rng();
     let now = SystemTime::now();
-    let seconds_since_epoch = now.duration_since(UNIX_EPOCH).expect("Failed to obtain current time").as_secs();
+    let seconds_since_epoch = now.duration_since(UNIX_EPOCH).expect("Time went backwards").as_secs();
 
     for m in &mut monitor_for_update.monitors {
         let value = rng.gen_range(0..100);
@@ -40,9 +40,17 @@ fn update_monitors(monitor_for_update: &mut Monitors) {
             value,
             processed_at: seconds_since_epoch,
         });
-        println!("Monitor: {:?}", m);
+        println!("Updated Monitor: {:?}", m);
     }
+
+    // Serialize the updated monitors to a JSON string
+    let updated_json = serde_json::to_string_pretty(monitor_for_update)?;
+    // Write the updated JSON string back to the original file
+    std::fs::write(input_path, updated_json)?;
+
+    Ok(())
 }
+
 
 fn store_monitors(monitor_for_update: &Monitors) -> Result<(), IOError> {
     let now = SystemTime::now();
@@ -54,26 +62,33 @@ fn store_monitors(monitor_for_update: &Monitors) -> Result<(), IOError> {
     Ok(())
 }
 
-fn process_monitors(input_path: &str) -> Result<(), IOError> {
-    let mut monitor_for_update = {
-        let monitor = std::fs::read_to_string(input_path)?;
-        serde_json::from_str::<Monitors>(&monitor)?
-    };
-
+fn process_monitors(input_path: &str) -> Result<(), std::io::Error> {
     let five_mins = Duration::from_secs(300);
     let start_time = SystemTime::now();
+    let mut last_store_time = SystemTime::now(); // Track the last time we stored the data.
 
     while start_time.elapsed().unwrap() < five_mins {
-        update_monitors(&mut monitor_for_update);
-        if start_time.elapsed().unwrap().as_secs() % 60 == 0 {
-            store_monitors(&monitor_for_update)?; //sotring monitors after 1 min 
+        let mut monitor_for_update = {
+            let file_content = std::fs::read_to_string(input_path)?;
+            serde_json::from_str::<Monitors>(&file_content)?
+        };
+
+        update_monitors(input_path, &mut monitor_for_update)?;
+
+        // If a minute has passed since the last store operation, save the current state to a new file.
+        if last_store_time.elapsed().unwrap() >= Duration::from_secs(60) {
+            store_monitors(&monitor_for_update)?;
+            last_store_time = SystemTime::now(); // Update the last store time to the current time.
+            println!("Data stored to a new file.");
         }
-        //  30 seconds break for each update
+
+        println!("Update cycle complete. Waiting for the next cycle.");
         thread::sleep(Duration::from_secs(30));
     }
 
     Ok(())
 }
+
 
 fn main() -> Result<(), IOError> {
     let input_path = match std::env::args().nth(1) {
