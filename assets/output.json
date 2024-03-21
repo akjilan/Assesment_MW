@@ -4,8 +4,8 @@
     "monitor_id": null,
     "name": "Custom Monitor - 1",
     "result": {
-      "processed_at": 1710996318,
-      "value": 9
+      "processed_at": 1711000167,
+      "value": 8
     },
     "script": "scripts/disk.sh",
     "type": null
@@ -15,8 +15,8 @@
     "monitor_id": 467,
     "name": "Local Monitor - 1",
     "result": {
-      "processed_at": 1710996318,
-      "value": 42
+      "processed_at": 1711000167,
+      "value": 43
     },
     "script": null,
     "type": "cpu"
@@ -26,8 +26,8 @@
     "monitor_id": 468,
     "name": "Local Monitor - 2",
     "result": {
-      "processed_at": 1710996318,
-      "value": 29
+      "processed_at": 1711000167,
+      "value": 80
     },
     "script": "scripts/mem.sh",
     "type": null
